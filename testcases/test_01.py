@@ -51,7 +51,7 @@ class TestMultiPhone(BaseTest):
         #     self.secondary_smarthome_page.stop_smarthome_app()
 
     def teardown_method(self):
-        with allure.step("后置处理：恢复设备名称"):
+        with allure.step("后置处理：恢复设备名称!"):
             logger.info('后置处理：恢复设备名称')
             self.device_manage_page.edit_devicename(self.devicename)
         self.smarthome_page.stop_smarthome_app()
