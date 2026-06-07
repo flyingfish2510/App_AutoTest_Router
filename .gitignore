@@ -1,0 +1,93 @@
+# ==============================
+# Python 核心
+# ==============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ==============================
+# 虚拟环境（极其重要）
+# ==============================
+venv/
+env/
+.venv/
+ENV/
+.ENV/
+
+# ==============================
+# 自动化测试专用（重点）
+# ==============================
+# 测试报告（HTML/Allure等）
+report/
+reports/
+allure-results/
+allure-report/
+test_output/
+
+# 日志文件
+logs/
+*.log
+
+# 屏幕截图 / 录屏
+screenshots/
+*.png
+*.jpg
+*.mp4
+
+# 测试缓存
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ==============================
+# 依赖 & 构建
+# ==============================
+dist/
+build/
+*.egg-info/
+.eggs/
+wheelhouse/
+
+# ==============================
+# IDE & 编辑器
+# ==============================
+# PyCharm
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+
+# ==============================
+# 操作系统
+# ==============================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Mac
+.DS_Store
+.AppleDouble
+
+# Linux
+*~
+
+# ==============================
+# 敏感信息（千万别传）
+# ==============================
+.env
+config.ini
+credentials.json
+*.pem
+*.key

@@ -1,0 +1,35 @@
+logging:
+  level: "DEBUG"
+  console_enabled: true
+  file_enabled: true
+
+  # ===== 日志文件命名策略 =====
+  file_naming:
+    # 文件名前缀
+    prefix: "app"
+    # 时间格式 (strftime格式)
+    time_format: "%Y-%m-%d"
+    # 后缀
+    suffix: ".log"
+    # 是否包含进程ID
+    include_pid: false
+    # 是否包含环境标识
+    include_env: true
+    # 自定义分隔符
+    separator: "_"
+
+  # 日志目录
+  log_dir: "./logs"
+
+  # 轮转策略（与时间命名配合）
+  rotation: "00:00"           # 每天午夜轮转
+  retention: "30 days"
+  compression: "zip"
+
+  format:
+    console: "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+    file: "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}"
+
+  diagnose: true
+  backtrace: true
+  environment: "development"

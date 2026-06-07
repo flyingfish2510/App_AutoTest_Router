@@ -1,0 +1,15 @@
+# config/app_config.yaml
+appium:
+  server: "http://127.0.0.1:4723"
+
+# 设备配置（通用，不限制设备名称）
+devices:
+  device_01:
+    udid: "619aae4"
+    system_port: 8200
+    enabled: true
+
+  device_02:
+    udid: "emulator-5554"
+    system_port: 8201
+    enabled: true
