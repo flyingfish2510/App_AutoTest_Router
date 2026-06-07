@@ -12,12 +12,6 @@ from appium.options.android import UiAutomator2Options
 from common.exceptions import DriverInitException
 from config.setting import app_config
 
-# =======================
-# 应用相关常量（本地定义）
-# =======================
-APP_PACKAGE = "com.huawei.smarthome"
-APP_ACTIVITY = ".loader.a.ActivityP9NRTS"
-
 
 class AndroidDriverManager:
     def __init__(self, device_info: dict):
@@ -37,10 +31,7 @@ class AndroidDriverManager:
                 "udid": self.device_info["udid"],
                 "systemPort": self.device_info["system_port"],
 
-                # ✅ 使用本地定义的应用常量
-                "appPackage": APP_PACKAGE,
-                "appActivity": APP_ACTIVITY,
-
+                # ✅ 移除应用包名和活动配置（由测试用例控制）
                 "noReset": True,
                 "fullReset": False,
                 "skipServerInstallation": True,

@@ -1,3 +1,4 @@
+# main.py
 import os
 
 import pytest
@@ -24,7 +25,6 @@ def run():
                     "--reruns=3", "--reruns-delay=2"
                    """
     os.system(r"allure generate ./report/tmp -o ./report/html --clean")
-
 
 
 if __name__ == '__main__':
