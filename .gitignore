@@ -91,3 +91,4 @@ config.ini
 credentials.json
 *.pem
 *.key
+/allure_history/
