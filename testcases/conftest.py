@@ -18,13 +18,6 @@ from common.driver_manager import AndroidDriverManager
 from config.setting import app_config
 from utils.logging.logger import logger
 
-# =======================
-# Allure 相关常量
-# =======================
-ALLURE_EPIC = "Router"
-ALLURE_FEATURE = "Device"
-
-
 def pytest_addoption(parser):
     parser.addoption(
         "--device",
@@ -89,8 +82,6 @@ def default_driver(request) -> Generator:
     device_name = device_info["name"]
     udid = device_info["udid"]
 
-    allure.dynamic.epic(ALLURE_EPIC)
-    allure.dynamic.feature(ALLURE_FEATURE)
     allure.dynamic.tag(f"Device:{device_name}")
     allure.dynamic.parameter("udid", udid)
 
@@ -128,7 +119,7 @@ def secondary_driver_manager(request):
 
     yield manager
 
-    # 测试结束后清理
+    # 测试结束后清理（仅当device_02启用且Driver已初始化时）
     if manager.driver:
         logger.info(f"🛑 清理设备: {device_info['name']}")
         BasePage.clear_window_size_cache()
