@@ -10,7 +10,6 @@ from appium.webdriver.common.appiumby import AppiumBy as By
 from common.base_page import BasePage
 from common.exceptions import ElementNotFoundException
 from common.page_validator import PageValidator
-from pages.device_page import DevicePage
 from utils.logging.logger import logger
 
 

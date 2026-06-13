@@ -3,7 +3,7 @@ import allure
 from pages.device_manage_page import DeviceManagePage
 from pages.device_page import DevicePage
 from pages.access_device_page import AccessDevicePage
-from pages.online_device_page import OnlineDevicePage
+from pages.access_device_manage_page import AccessDeviceManagePage
 from pages.router_page import RouterPage
 from pages.smarthome_page import SmartHomePage
 from testcases.base_test import BaseTest
@@ -18,7 +18,7 @@ class Test02(BaseTest):
         self.router_page = RouterPage(self.driver)
         self.device_page = DevicePage(self.driver)
         self.access_device_page = AccessDevicePage(self.driver)
-        self.online_device_page = OnlineDevicePage(self.driver)
+        self.access_device_manage_page = AccessDeviceManagePage(self.driver)
         self.device_manage_page = DeviceManagePage(self.driver)
         self.router_card_name = '路由 BE3 Pro'
         self.devicename = 'HUAWEI Mate 70'
@@ -30,8 +30,8 @@ class Test02(BaseTest):
         self.smarthome_page.enter_router_management(self.router_card_name)
         self.router_page.switch_to_device_table()
         self.device_page.switch_to_access_device_page()
-        self.access_device_page.switch_to_online_device_page()
-        self.online_device_page.switch_to_device_manage_page(self.devicename)
+        self.access_device_page.switch_to_offline_device_page()
+        self.access_device_manage_page.switch_to_device_manage_page(self.devicename)
         self.device_manage_page.edit_devicename(self.edit_devicename)
         assert self.edit_devicename == self.device_manage_page.get_device_name()
 

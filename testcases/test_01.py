@@ -4,7 +4,7 @@ import allure
 from pages.device_manage_page import DeviceManagePage
 from pages.device_page import DevicePage
 from pages.access_device_page import AccessDevicePage
-from pages.online_device_page import OnlineDevicePage
+from pages.access_device_manage_page import AccessDeviceManagePage
 from pages.router_page import RouterPage
 from pages.smarthome_page import SmartHomePage
 from testcases.base_test import BaseTest
@@ -12,7 +12,7 @@ from utils.logging.logger import logger
 
 
 @allure.epic("Router")
-@allure.feature("Multi-Device")
+@allure.feature("Device")
 class TestMultiPhone(BaseTest):
 
     def setup_method(self):
@@ -21,7 +21,7 @@ class TestMultiPhone(BaseTest):
         self.router_page = RouterPage(self.driver)
         self.device_page = DevicePage(self.driver)
         self.access_device_page = AccessDevicePage(self.driver)
-        self.online_device_page = OnlineDevicePage(self.driver)
+        self.online_device_page = AccessDeviceManagePage(self.driver)
         self.device_manage_page = DeviceManagePage(self.driver)
 
         self.router_card_name = '路由 BE3 Pro'

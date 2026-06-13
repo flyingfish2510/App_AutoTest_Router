@@ -116,12 +116,10 @@ def default_driver(request) -> Generator:
 # =======================
 @pytest.fixture(scope="class")
 def secondary_driver_manager(request):
-    """按需启动第二个设备的管理器（仅当 device_02 启用时）"""
+    """按需启动第二个设备的管理器（device_02）"""
     enabled_devices = get_enabled_devices()
-
-    # ✅ 关键防护：未启用 device_02 时，直接返回，不执行任何清理
     if len(enabled_devices) < 2:
-        logger.warning("⚠️ 未启用 device_02，跳过相关资源初始化与清理")
+        logger.warning("⚠️ 未配置第二个设备，无法启动 device_02")
         yield None
         return
 
@@ -130,10 +128,11 @@ def secondary_driver_manager(request):
 
     yield manager
 
-    # ✅ 仅当 device_02 启用时，才执行清理
-    logger.info(f"🛑 清理设备: {device_info['name']}")
-    BasePage.clear_window_size_cache()
-    manager.quit_driver()
+    # 测试结束后清理
+    if manager.driver:
+        logger.info(f"🛑 清理设备: {device_info['name']}")
+        BasePage.clear_window_size_cache()
+        manager.quit_driver()
 
 
 # =======================

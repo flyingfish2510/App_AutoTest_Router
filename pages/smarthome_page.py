@@ -11,7 +11,6 @@ from common.base_page import BasePage
 from common.device_controller import DeviceController
 from common.exceptions import ElementNotFoundException
 from common.page_validator import PageValidator
-from pages.router_page import RouterPage  # ✅ 导入RouterPage用于校验
 from utils.logging.logger import logger
 
 
@@ -36,7 +35,7 @@ class SmartHomePage(BasePage):
         self.device.go_home()
         self.device.restart_app(self.PACKAGE_NAME)
 
-        logger.debug("点击主页面入口元素")
+        logger.debug("点击家居按钮")
         self.click(self.JIAJU_LOCATOR, timeout=10)
 
         try:
