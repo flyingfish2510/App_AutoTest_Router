@@ -59,7 +59,7 @@ class RouterPage(BasePage):
         logger.info("📱 进入设备页面")
         try:
             # 方式1：点击设备选项卡（如果存在）
-            # self.click(self.DEVICE_TAB, timeout=10)
+            # self.click(self.DEVICE_TAB)
             self.sleep(3)
             self.tap(0.5, 0.65)
             logger.debug("✅ 点击设备选项卡")

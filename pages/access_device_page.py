@@ -38,7 +38,7 @@ class AccessDevicePage(BasePage):
     @allure.step("进入在线设备页面")
     def switch_to_online_device_page(self, timeout: int = 30):
         logger.info("📱 进入在线设备页面")
-        self.click(self.ONLINE_DEVICE_LOCATOR, timeout=10)
+        self.click(self.ONLINE_DEVICE_LOCATOR)
         logger.debug("✅ 点击在线设备按钮")
 
         # 验证在线设备页面是否加载成功
@@ -55,7 +55,7 @@ class AccessDevicePage(BasePage):
     @allure.step("进入离线设备页面")
     def switch_to_offline_device_page(self, timeout: int = 30):
         logger.info("📱 进入离线设备页面")
-        self.click(self.OFFLINE_DEVICE_LOCATOR, timeout=10)
+        self.click(self.OFFLINE_DEVICE_LOCATOR)
         logger.debug("✅ 点击离线设备按钮")
 
         # 验证在线设备页面是否加载成功

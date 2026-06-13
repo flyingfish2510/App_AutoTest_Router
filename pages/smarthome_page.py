@@ -36,7 +36,7 @@ class SmartHomePage(BasePage):
         self.device.restart_app(self.PACKAGE_NAME)
 
         logger.debug("点击家居按钮")
-        self.click(self.JIAJU_LOCATOR, timeout=10)
+        self.click(self.JIAJU_LOCATOR)
 
         try:
             self.validator.should_contain_element(self.JIAJU_LOCATOR, timeout=timeout)

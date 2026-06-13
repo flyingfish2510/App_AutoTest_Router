@@ -49,7 +49,7 @@ class DevicePage(BasePage):
         logger.info("📱 进入接入设备页面")
         try:
             # 方式1：点击接入设备按钮（如果存在）
-            # self.click(self.PAGE_INDICATOR, timeout=10)
+            # self.click(self.PAGE_INDICATOR)
             self.sleep(3)
             self.tap(0.5, 0.8)
             logger.debug("✅ 点击接入设备按钮")
