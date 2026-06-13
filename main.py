@@ -2,10 +2,11 @@
 import os
 import shutil
 import subprocess
+
 import pytest
 
-from config.setting import project_config
 from common.appium_server import appium_server_context
+from config.setting import project_config
 from utils.logging.logger import logger
 
 # =======================
@@ -111,7 +112,6 @@ def main():
     with appium_server_context():
         # 1. 确保目录存在
         ensure_directories()
-
         # 2. 清理旧的结果目录
         clean_results_directory()
 
