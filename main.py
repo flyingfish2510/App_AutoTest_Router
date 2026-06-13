@@ -104,7 +104,7 @@ def build_pytest_args() -> list:
     """构建 pytest 参数"""
     pytest_args = ["-s", f"--alluredir={RESULTS_DIR}"]
 
-    # 添加并发参数（从配置文件读取）
+    # 添加并发参数（配置文件读取）
     if PARALLEL_ENABLED:
         pytest_args.extend(["-n", str(PARALLEL_DEVICES)])
         logger.info(f"🔄 启用多设备并发，设备数: {PARALLEL_DEVICES}")
