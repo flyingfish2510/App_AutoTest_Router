@@ -13,3 +13,11 @@ devices:
     udid: "emulator-5554"
     system_port: 8201
     enabled: true
+
+# =======================
+# 并发配置
+# =======================
+parallel:
+  enabled: false          # 是否开启多设备并发执行（true/false）
+  devices: 2              # 并发设备数量（当 enabled 为 true 时生效）
+  device_filter: "all"    # 设备过滤器（all/device_01/device_02等）

@@ -1,12 +1,13 @@
 # testcases/conftest.py
 """
-pytest 夹具配置（支持单设备默认启动 + 多设备按需调用）
-✅ device_01 自动启动
-✅ device_02 用例中手动触发
-✅ 设备切换时清空屏幕尺寸缓存
+pytest 夹具配置（支持多设备并发）
+✅ 单设备默认启动
+✅ 多设备并发执行
+✅ 设备动态分配
 ✅ 失败自动截图
 """
 
+import os
 import time
 from typing import Generator, Dict, Any, List
 
@@ -17,6 +18,13 @@ from common.base_page import BasePage
 from common.driver_manager import AndroidDriverManager
 from config.setting import app_config
 from utils.logging.logger import logger
+
+# =======================
+# Allure 相关常量
+# =======================
+ALLURE_EPIC = "Router"
+ALLURE_FEATURE = "Device"
+
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -34,7 +42,7 @@ def pytest_addoption(parser):
 
 
 def get_enabled_devices() -> List[Dict[str, Any]]:
-    """获取所有启用的设备配置（自动注入设备名称）"""
+    """获取所有启用的设备配置"""
     devices = app_config.get("devices", {})
     enabled_devices = []
     for device_key, config in devices.items():
@@ -52,8 +60,33 @@ def filter_devices(devices: List[Dict[str, Any]], device_filter: str) -> List[Di
     return filtered if filtered else devices
 
 
+def get_worker_id() -> int:
+    """获取当前 worker 的 ID（用于多设备并发分配）"""
+    # 尝试从环境变量获取 worker ID
+    worker_id = os.environ.get('PYTEST_XDIST_WORKER')
+    if worker_id:
+        # worker_id 格式通常是 "gw0", "gw1" 等
+        try:
+            return int(worker_id.replace('gw', ''))
+        except (ValueError, AttributeError):
+            pass
+
+    # 默认返回 0
+    return 0
+
+
+def assign_device_to_worker(devices: List[Dict[str, Any]], worker_id: int) -> Dict[str, Any]:
+    """根据 worker ID 分配设备"""
+    if not devices:
+        raise RuntimeError("没有可用的设备")
+
+    # 循环分配设备
+    device_index = worker_id % len(devices)
+    return devices[device_index]
+
+
 def pytest_generate_tests(metafunc):
-    """参数化设备配置（保留兼容性）"""
+    """参数化设备配置"""
     if "device_info" in metafunc.fixturenames:
         all_devices = get_enabled_devices()
         device_filter = metafunc.config.getoption("--device") or metafunc.config.getini("device_filter")
@@ -68,24 +101,31 @@ def pytest_generate_tests(metafunc):
 
 
 # =======================
-# 核心夹具：默认启动 device_01
+# 核心夹具：动态设备分配（支持单设备和多设备并发）
 # =======================
 @pytest.fixture(scope="class")
-def default_driver(request) -> Generator:
-    """默认仅启动第一个启用设备（device_01）"""
+def dynamic_driver(request) -> Generator:
+    """动态分配设备（支持单设备和多设备并发）"""
     enabled_devices = get_enabled_devices()
     if not enabled_devices:
         raise RuntimeError("没有启用的设备")
 
-    # 取第一个设备（device_01）
-    device_info = enabled_devices[0]
+    # 获取当前 worker ID
+    worker_id = get_worker_id()
+
+    # 分配设备
+    device_info = assign_device_to_worker(enabled_devices, worker_id)
     device_name = device_info["name"]
     udid = device_info["udid"]
 
+    allure.dynamic.epic(ALLURE_EPIC)
+    allure.dynamic.feature(ALLURE_FEATURE)
     allure.dynamic.tag(f"Device:{device_name}")
     allure.dynamic.parameter("udid", udid)
+    allure.dynamic.parameter("worker_id", worker_id)
 
-    logger.info(f"🚀 默认启动设备: {device_name} ({udid})")
+    logger.info(f"🚀 Worker {worker_id} 启动设备: {device_name} ({udid})")
+
     manager = AndroidDriverManager(device_info)
 
     try:

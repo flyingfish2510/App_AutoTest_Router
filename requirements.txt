@@ -5,4 +5,5 @@ allure-pytest==2.13.5
 allure-python-commons==2.13.5
 PyYAML>=6.0
 loguru>=0.7.2
-requests
+requests==2.34.2
+pytest-xdist==3.8.0
