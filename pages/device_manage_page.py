@@ -26,11 +26,11 @@ class DeviceManagePage(BasePage):
         :param timeout: 页面加载超时时间（秒）
         :return: 自身实例（支持链式调用）
         """
-        logger.info("🔍 验证设备管理设备页面加载状态")
+        logger.debug("🔍 验证设备管理设备页面加载状态")
         try:
             # 优先验证页面指示器
             self.validator.should_contain_element(self.PAGE_INDICATOR, timeout=timeout)
-            logger.info("✅ 设备管理页面加载成功（通过页面指示器验证）")
+            logger.debug("✅ 设备管理页面加载成功（通过页面指示器验证）")
         except ElementNotFoundException:
             logger.warning("⚠️ 未找到接入页面指示器")
             raise
@@ -39,17 +39,17 @@ class DeviceManagePage(BasePage):
 
     @allure.step("修改下挂设备名称为{device_name}")
     def edit_devicename(self, device_name):
-        logger.info("点击下挂设备名称修改按钮")
+        logger.debug("点击下挂设备名称修改按钮")
         self.click(self.EDIT_DEVICE_NAME_LOCATOR)
-        logger.info(f"修改下挂设备名称为：{device_name}")
+        logger.debug(f"修改下挂设备名称为：{device_name}")
         self.input(self.DEVICE_NAME_INPUT_LOCATOR, device_name)
-        logger.info("点击确认按钮")
+        logger.debug("点击确认按钮")
         self.click(self.OK_BUTTON_LOCATOR)
 
     @allure.step("获取下挂设备名称")
     def get_device_name(self):
         device_name = self.get_text(self.DEVICE_NAME_LOCATOR)
-        logger.info(f'当前下挂设备名称：{device_name}')
+        logger.debug(f'当前下挂设备名称：{device_name}')
         return device_name
 
 

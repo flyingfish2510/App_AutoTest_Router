@@ -62,16 +62,12 @@ def filter_devices(devices: List[Dict[str, Any]], device_filter: str) -> List[Di
 
 def get_worker_id() -> int:
     """获取当前 worker 的 ID（用于多设备并发分配）"""
-    # 尝试从环境变量获取 worker ID
     worker_id = os.environ.get('PYTEST_XDIST_WORKER')
     if worker_id:
-        # worker_id 格式通常是 "gw0", "gw1" 等
         try:
             return int(worker_id.replace('gw', ''))
         except (ValueError, AttributeError):
             pass
-
-    # 默认返回 0
     return 0
 
 
@@ -79,26 +75,13 @@ def assign_device_to_worker(devices: List[Dict[str, Any]], worker_id: int) -> Di
     """根据 worker ID 分配设备"""
     if not devices:
         raise RuntimeError("没有可用的设备")
-
-    # 循环分配设备
     device_index = worker_id % len(devices)
     return devices[device_index]
 
 
-def pytest_generate_tests(metafunc):
-    """参数化设备配置"""
-    if "device_info" in metafunc.fixturenames:
-        all_devices = get_enabled_devices()
-        device_filter = metafunc.config.getoption("--device") or metafunc.config.getini("device_filter")
-        devices = filter_devices(all_devices, device_filter)
-
-        metafunc.parametrize(
-            "device_info",
-            devices,
-            ids=[d["name"] for d in devices],
-            scope="class"
-        )
-
+# =======================
+# ✅ 移除 pytest_generate_tests（不再需要）
+# =======================
 
 # =======================
 # 核心夹具：动态设备分配（支持单设备和多设备并发）
@@ -110,11 +93,19 @@ def dynamic_driver(request) -> Generator:
     if not enabled_devices:
         raise RuntimeError("没有启用的设备")
 
-    # 获取当前 worker ID
+    # ✅ 关键修改：获取设备过滤条件
+    device_filter = request.config.getoption("--device") or request.config.getini("device_filter")
+
+    # ✅ 过滤设备
+    filtered_devices = filter_devices(enabled_devices, device_filter)
+    if not filtered_devices:
+        raise RuntimeError(f"没有找到匹配 '{device_filter}' 的设备")
+
+    # ✅ 获取当前 worker ID
     worker_id = get_worker_id()
 
-    # 分配设备
-    device_info = assign_device_to_worker(enabled_devices, worker_id)
+    # ✅ 从过滤后的设备中分配
+    device_info = assign_device_to_worker(filtered_devices, worker_id)
     device_name = device_info["name"]
     udid = device_info["udid"]
 
@@ -123,8 +114,11 @@ def dynamic_driver(request) -> Generator:
     allure.dynamic.tag(f"Device:{device_name}")
     allure.dynamic.parameter("udid", udid)
     allure.dynamic.parameter("worker_id", worker_id)
+    allure.dynamic.parameter("device_filter", device_filter)
 
     logger.info(f"🚀 Worker {worker_id} 启动设备: {device_name} ({udid})")
+    logger.info(f"📱 设备过滤条件: {device_filter}")
+    logger.info(f"📱 可用设备数: {len(filtered_devices)}")
 
     manager = AndroidDriverManager(device_info)
 
@@ -159,7 +153,6 @@ def secondary_driver_manager(request):
 
     yield manager
 
-    # 测试结束后清理（仅当device_02启用且Driver已初始化时）
     if manager.driver:
         logger.info(f"🛑 清理设备: {device_info['name']}")
         BasePage.clear_window_size_cache()
@@ -171,18 +164,10 @@ def secondary_driver_manager(request):
 # =======================
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
-    """
-    合并的钩子函数：
-    1. 记录测试结果供 BaseTest 使用
-    2. 失败时自动截图
-    """
     outcome = yield
     rep = outcome.get_result()
-
-    # 1. 记录测试结果（供 BaseTest._test_failed() 使用）
     setattr(item, f"rep_{rep.when}", rep)
 
-    # 2. 失败时自动截图（仅在 call 阶段且测试失败时）
     if rep.when == "call" and rep.failed:
         driver = _get_driver_from_item(item)
         if driver:
@@ -192,20 +177,76 @@ def pytest_runtest_makereport(item, call):
 
 
 def _get_driver_from_item(item) -> Any:
-    """从测试项中获取 driver"""
     if hasattr(item.instance, "driver"):
         return item.instance.driver
     return None
 
 
 def _attach_screenshot(driver, name: str):
-    """附加截图到 Allure 报告"""
     try:
         screenshot = driver.get_screenshot_as_png()
         allure.attach(screenshot, name=name, attachment_type=allure.attachment_type.PNG)
     except Exception as e:
         logger.warning(f"⚠️ 截图失败: {e}")
 
+
+# =======================
+# 用例筛选：根据 testcase.txt
+# =======================
+def pytest_collection_modifyitems(session, config, items):
+    """
+    根据项目根目录下的 testcase.txt 筛选测试用例
+    ✅ 支持：test_01
+    ✅ 支持：Test01::test_01
+    ✅ 支持注释 #
+    ✅ 支持空行
+    """
+    import os
+
+    project_root = os.path.dirname(os.path.dirname(__file__))
+    testcase_file = os.path.join(project_root, "testcase.txt")
+
+    if not os.path.exists(testcase_file):
+        logger.warning("⚠️ testcase.txt 不存在，将运行所有用例")
+        return
+
+    with open(testcase_file, "r", encoding="utf-8") as f:
+        raw_lines = f.readlines()
+
+    # 解析用例名（支持注释、去空行）
+    selected_cases = set()
+    for line in raw_lines:
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        selected_cases.add(line)
+
+    if not selected_cases:
+        logger.info("ℹ️ testcase.txt 为空，将运行所有用例")
+        return
+
+    selected = []
+    deselected = []
+
+    for item in items:
+        # item.name = 测试函数名，如 test_01
+        # item.nodeid = testcases/test_01.py::Test01::test_01
+        if item.name in selected_cases:
+            selected.append(item)
+        elif "::".join(item.nodeid.split("::")[1:]) in selected_cases:
+            selected.append(item)
+        else:
+            deselected.append(item)
+
+    # 替换用例列表
+    items[:] = selected
+
+    # 通知 pytest 哪些用例被跳过（影响报告统计）
+    config.hook.pytest_deselected(items=deselected)
+
+    logger.info(
+        f"✅ 根据 testcase.txt 筛选：运行 {len(selected)} 条，跳过 {len(deselected)} 条"
+    )
 
 # =======================
 # 会话生命周期日志

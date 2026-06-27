@@ -1,6 +1,6 @@
 import allure
-
 from appium.webdriver.common.appiumby import AppiumBy as By
+
 from common.base_page import BasePage
 from common.exceptions import ElementNotFoundException
 from common.page_validator import PageValidator
@@ -24,11 +24,11 @@ class AccessDevicePage(BasePage):
         :param timeout: 页面加载超时时间（秒）
         :return: 自身实例（支持链式调用）
         """
-        logger.info("🔍 验证接入设备页面加载状态")
+        logger.debug("🔍 验证接入设备页面加载状态")
         try:
             # 优先验证页面指示器
             self.validator.should_contain_element(self.PAGE_INDICATOR, timeout=timeout)
-            logger.info("✅ 接入设备页面加载成功（通过页面指示器验证）")
+            logger.debug("✅ 接入设备页面加载成功（通过页面指示器验证）")
         except ElementNotFoundException:
             logger.warning("⚠️ 未找到接入页面指示器")
             raise
@@ -37,7 +37,7 @@ class AccessDevicePage(BasePage):
 
     @allure.step("进入在线设备页面")
     def switch_to_online_device_page(self, timeout: int = 30):
-        logger.info("📱 进入在线设备页面")
+        logger.debug("📱 进入在线设备页面")
         self.click(self.ONLINE_DEVICE_LOCATOR)
         logger.debug("✅ 点击在线设备按钮")
 
@@ -45,7 +45,7 @@ class AccessDevicePage(BasePage):
         try:
             online_device_page = AccessDeviceManagePage(self.driver)
             online_device_page._validate_page_loaded(timeout=timeout)
-            logger.info("✅ 成功进入在线设备页面")
+            logger.debug("✅ 成功进入在线设备页面")
         except ElementNotFoundException as e:
             logger.error(f"❌ 进入在线设备页面失败: {e}")
             raise
@@ -54,7 +54,7 @@ class AccessDevicePage(BasePage):
 
     @allure.step("进入离线设备页面")
     def switch_to_offline_device_page(self, timeout: int = 30):
-        logger.info("📱 进入离线设备页面")
+        logger.debug("📱 进入离线设备页面")
         self.click(self.OFFLINE_DEVICE_LOCATOR)
         logger.debug("✅ 点击离线设备按钮")
 
@@ -62,7 +62,7 @@ class AccessDevicePage(BasePage):
         try:
             online_device_page = AccessDeviceManagePage(self.driver)
             online_device_page._validate_page_loaded(timeout=timeout)
-            logger.info("✅ 成功进入离线设备页面")
+            logger.debug("✅ 成功进入离线设备页面")
         except ElementNotFoundException as e:
             logger.error(f"❌ 进入离线设备页面失败: {e}")
             raise
