@@ -1,10 +1,8 @@
 # common/appium_server.py
 """
-Appium Server 管理器（独立模块）
-✅ 支持自启动
-✅ 宽松安全模式
-✅ 端口冲突自动释放
-✅ 优雅关闭
+Appium Server 管理器（支持 CI / 本地双模）
+✅ 本地：自启动 + 端口管理
+✅ CI：只读模式，直连宿主机 Appium
 """
 
 import os
@@ -24,13 +22,27 @@ class AppiumServer:
     """Appium Server 管理类"""
 
     def __init__(self, host: str = "127.0.0.1", port: int = 4723):
-        self.host = host
+        # ✅ CI 环境识别（Jenkins 中配置 CI=true）
+        self.ci_mode = os.getenv("CI", "false").lower() == "true"
+
+        # ✅ CI 模式下强制使用宿主机地址
+        if self.ci_mode:
+            self.host = os.getenv("APPIUM_HOST", "host.docker.internal")
+        else:
+            self.host = host
+
         self.port = port
-        self.server_url = f"http://{host}:{port}"
+        self.server_url = f"http://{self.host}:{port}"
         self.process: Optional[subprocess.Popen] = None
 
+        if self.ci_mode:
+            logger.info(f"🧪 CI 模式：跳过 Appium 自启动，直连 {self.server_url}")
+
     def is_port_available(self) -> bool:
-        """检查端口是否可用"""
+        """检查端口是否可用（CI 模式下跳过）"""
+        if self.ci_mode:
+            return True  # CI 不关心端口占用，由宿主机负责
+
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             try:
                 s.bind((self.host, self.port))
@@ -47,16 +59,23 @@ class AppiumServer:
             return False
 
     def start(self) -> bool:
-        """启动 Appium Server"""
+        """启动 Appium Server（CI 模式下直接跳过）"""
+        if self.ci_mode:
+            if self.is_server_running():
+                logger.info(f"✅ CI 模式：检测到 Appium Server 已运行 {self.server_url}")
+                return True
+            else:
+                logger.error(f"❌ CI 模式：Appium Server 未运行，请先在宿主机启动")
+                logger.error(f"   执行：appium -a 0.0.0.0 -p {self.port} --session-override")
+                return False
+
         logger.info(f"🚀 启动 Appium Server: {self.server_url}")
 
-        # 端口被占用则释放
         if not self.is_port_available():
             logger.warning(f"⚠️ 端口 {self.port} 被占用，尝试释放...")
             self._kill_process_on_port()
             time.sleep(2)
 
-        # ✅ 必须加 --relaxed-security
         cmd = [
             "appium",
             "--address", self.host,
@@ -88,7 +107,6 @@ class AppiumServer:
             return False
 
     def _wait_for_server(self, timeout: int = 30) -> bool:
-        """等待服务器就绪"""
         logger.info("⏳ 等待 Appium Server 就绪...")
         for _ in range(timeout):
             if self.is_server_running():
@@ -97,7 +115,10 @@ class AppiumServer:
         return False
 
     def _kill_process_on_port(self):
-        """杀掉占用端口的进程"""
+        """杀掉占用端口的进程（CI 模式下不执行）"""
+        if self.ci_mode:
+            return
+
         try:
             if os.name == 'nt':
                 subprocess.run(
@@ -117,8 +138,8 @@ class AppiumServer:
             pass
 
     def stop(self):
-        """停止 Appium Server"""
-        if not self.process:
+        """停止 Appium Server（CI 模式下不执行）"""
+        if self.ci_mode or not self.process:
             return
 
         logger.info("🛑 停止 Appium Server...")
@@ -142,7 +163,7 @@ def appium_server_context(host: str = "127.0.0.1", port: int = 4723):
     server = AppiumServer(host=host, port=port)
     try:
         if server.is_server_running():
-            logger.info(f"ℹ️ Appium Server 已在运行: {server.server_url}")
+            logger.info(f"ℹ️ Appium Server 已运行: {server.server_url}")
             yield server
         else:
             if server.start():
@@ -150,5 +171,4 @@ def appium_server_context(host: str = "127.0.0.1", port: int = 4723):
             else:
                 raise RuntimeError("Appium Server 启动失败")
     finally:
-        if server.process:
-            server.stop()
+        server.stop()
