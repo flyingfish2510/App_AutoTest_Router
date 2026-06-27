@@ -92,4 +92,4 @@ credentials.json
 *.pem
 *.key
 /allure_history/
-.testcase.txt
+/testcase.txt
