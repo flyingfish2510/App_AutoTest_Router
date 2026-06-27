@@ -1,10 +1,17 @@
+# testcases/base_test.py
 import allure
 import pytest
+from appium.webdriver.webdriver import WebDriver
 
 from utils.logging.logger import logger
 
 
 class BaseTest:
+    # =======================
+    # ✅ 给 IDE 看的类型声明
+    # =======================
+    driver: WebDriver
+    secondary_manager: object
 
     @pytest.fixture(autouse=True)
     def auto_inject_fixtures(self, dynamic_driver, secondary_driver_manager, request):
@@ -25,6 +32,9 @@ class BaseTest:
     def _test_failed(self) -> bool:
         return hasattr(self, "rep_call") and self.rep_call.failed
 
+    # =======================
+    # 业务层（子类重写）
+    # =======================
     def setup(self):
         pass
 
@@ -32,7 +42,7 @@ class BaseTest:
         pass
 
     # =======================
-    # ✅ 关键修改：使用 dynamic.step
+    # ✅ 纯文本 Step / Checkpoint
     # =======================
     def step(self, title: str):
         with allure.step(title):
