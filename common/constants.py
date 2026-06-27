@@ -3,6 +3,9 @@
 项目通用常量定义
 ✅ 仅包含跨模块共享的通用常量
 """
+from config.setting import FILE_PATH
+from utils.data.yaml_reader import read_yaml
+from utils.logging.logger import logger
 
 # =======================
 # 时间相关常量
@@ -42,3 +45,25 @@ ELEMENT_INPUT_FAILED_CODE = "E1004"        # 元素输入失败异常代码
 PAGE_SWITCH_FAILED_CODE = "E2001"          # 页面切换失败异常代码
 DRIVER_INIT_FAILED_CODE = "E3001"           # Driver初始化失败异常代码
 DEVICE_OPERATION_FAILED_CODE = "E3002"      # 设备操作失败异常代码
+
+class MYG:
+    ROUTER_NAME = None
+    PHONE_NAME = None
+    PHONE_NEW_NAME = None
+
+    def __init__(self):
+        try:
+            data = read_yaml(FILE_PATH['user_config'])
+            self.ROUTER_NAME = data['router_name']
+            self.PHONE_NAME = data['phone_name']
+            self.PHONE_NEW_NAME = data['phone_new_name']  # 修正这里：使用 phone_new_name
+        except Exception as e:
+            # 添加异常处理，防止配置文件读取失败导致程序崩溃
+            logger.warning(f"警告: 加载 user_config.yaml 失败 - {e}")
+            logger.warning("将使用默认配置")
+            self.ROUTER_NAME = "默认路由器"
+            self.PHONE_NAME = "默认手机"
+            self.PHONE_NEW_NAME = "默认手机新名称"
+
+# 创建单例实例
+MYG = MYG()

@@ -167,31 +167,44 @@ def secondary_driver_manager(request):
 
 
 # =======================
-# 失败截图钩子
+# 合并的 pytest_runtest_makereport 钩子
 # =======================
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
+    """
+    合并的钩子函数：
+    1. 记录测试结果供 BaseTest 使用
+    2. 失败时自动截图
+    """
     outcome = yield
     rep = outcome.get_result()
+
+    # 1. 记录测试结果（供 BaseTest._test_failed() 使用）
+    setattr(item, f"rep_{rep.when}", rep)
+
+    # 2. 失败时自动截图（仅在 call 阶段且测试失败时）
     if rep.when == "call" and rep.failed:
         driver = _get_driver_from_item(item)
         if driver:
             screenshot_name = f"{item.name}_{int(time.time())}_failed"
             _attach_screenshot(driver, screenshot_name)
+            logger.error(f"❌ 测试失败，已截图: {screenshot_name}")
 
 
 def _get_driver_from_item(item) -> Any:
+    """从测试项中获取 driver"""
     if hasattr(item.instance, "driver"):
         return item.instance.driver
     return None
 
 
 def _attach_screenshot(driver, name: str):
+    """附加截图到 Allure 报告"""
     try:
         screenshot = driver.get_screenshot_as_png()
         allure.attach(screenshot, name=name, attachment_type=allure.attachment_type.PNG)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"⚠️ 截图失败: {e}")
 
 
 # =======================

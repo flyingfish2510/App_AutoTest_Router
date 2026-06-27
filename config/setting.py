@@ -10,7 +10,7 @@ FILE_PATH = {
     'project_config': os.path.join(DIR_PATH, 'config', 'project_config.yaml'),
     'app_config': os.path.join(DIR_PATH, 'config', 'app_config.yaml'),
     'log': os.path.join(DIR_PATH, 'logs'),
-
+    'user_config': os.path.join(DIR_PATH, 'config', 'user_config.yaml')
 }
 
 project_config = read_yaml(FILE_PATH['project_config'])
