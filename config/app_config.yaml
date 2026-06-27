@@ -1,6 +1,6 @@
 # config/app_config.yaml
 appium:
-  server: "host.docker.internal:4723"
+  server: "http://host.docker.internal:4723"
 
 # 设备配置（通用，不限制设备名称）
 devices:
