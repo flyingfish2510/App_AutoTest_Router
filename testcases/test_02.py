@@ -40,6 +40,7 @@ class Test02(BaseTest):
         self.device_manage_page.edit_devicename(MYG.PHONE_NEW_NAME)
 
         self.checkpoint(f'检查点4：检查设备名称修改是否成功')
+        self.sleep()
         assert MYG.PHONE_NEW_NAME == self.device_manage_page.get_device_name()
 
     def teardown(self):

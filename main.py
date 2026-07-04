@@ -17,6 +17,7 @@ from datetime import datetime
 
 import pytest
 
+from common.appium_server import appium_server_context
 from config.setting import project_config, app_config
 from utils.logging.logger import logger
 
@@ -218,30 +219,30 @@ def main():
         setup_environment()
 
         # 2. 使用 Appium Server 上下文（自动管理生命周期）
-        # with appium_server_context():
+        with appium_server_context():
             # 3. 准备目录
-        ensure_directories()
+            ensure_directories()
 
-        # 4. 清理旧结果
-        clean_previous_results()
+            # 4. 清理旧结果
+            clean_previous_results()
 
-        # 5. 注入历史数据
-        inject_history_data()
+            # 5. 注入历史数据
+            inject_history_data()
 
-        # 6. 构建 pytest 参数（从配置文件读取并发配置）
-        pytest_args = build_pytest_args()
+            # 6. 构建 pytest 参数（从配置文件读取并发配置）
+            pytest_args = build_pytest_args()
 
-        # 7. 运行测试
-        exit_code = run_tests(pytest_args)
+            # 7. 运行测试
+            exit_code = run_tests(pytest_args)
 
-        # 8. 生成报告
-        report_generated = generate_report()
+            # 8. 生成报告
+            report_generated = generate_report()
 
-        # 9. 备份历史数据（仅当报告生成成功时）
-        if report_generated:
-            backup_history_data()
-        else:
-            logger.warning("⚠️ 报告未生成，跳过历史数据备份")
+            # 9. 备份历史数据（仅当报告生成成功时）
+            if report_generated:
+                backup_history_data()
+            else:
+                logger.warning("⚠️ 报告未生成，跳过历史数据备份")
 
     except TestExecutionError as e:
         logger.error(f"❌ 测试执行错误: {e}")

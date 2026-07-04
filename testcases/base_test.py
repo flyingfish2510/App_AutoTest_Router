@@ -1,4 +1,6 @@
 # testcases/base_test.py
+import time
+
 import allure
 import pytest
 from appium.webdriver.webdriver import WebDriver
@@ -53,3 +55,6 @@ class BaseTest:
         with allure.step(title):
             pass
         logger.info(f"🔍 {title}")
+
+    def sleep(self, seconds: int = 1):
+        time.sleep(seconds)
