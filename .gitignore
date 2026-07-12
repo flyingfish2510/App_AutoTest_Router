@@ -91,5 +91,7 @@ config.ini
 credentials.json
 *.pem
 *.key
-/allure_history/
-/testcase.txt
+allure_history
+testcase.txt
+show_tree.py
+.git
