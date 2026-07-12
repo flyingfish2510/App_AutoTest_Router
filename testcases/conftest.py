@@ -17,7 +17,7 @@ import pytest
 from common.base_page import BasePage
 from common.driver_manager import AndroidDriverManager
 from config.setting import app_config
-from utils.logging.logger import logger
+from utils.logging.log_tool import log
 
 # =======================
 # Allure 相关常量
@@ -116,22 +116,22 @@ def dynamic_driver(request) -> Generator:
     allure.dynamic.parameter("worker_id", worker_id)
     allure.dynamic.parameter("device_filter", device_filter)
 
-    logger.info(f"🚀 Worker {worker_id} 启动设备: {device_name} ({udid})")
-    logger.info(f"📱 设备过滤条件: {device_filter}")
-    logger.info(f"📱 可用设备数: {len(filtered_devices)}")
+    log.info(f"🚀 Worker {worker_id} 启动设备: {device_name} ({udid})")
+    log.info(f"📱 设备过滤条件: {device_filter}")
+    log.info(f"📱 可用设备数: {len(filtered_devices)}")
 
     manager = AndroidDriverManager(device_info)
 
     try:
         drv = manager.init_driver()
         request.cls.driver = drv
-        logger.info(f"✅ 设备 {device_name} Driver 初始化成功")
+        log.info(f"✅ 设备 {device_name} Driver 初始化成功")
         yield drv
     except Exception as e:
-        logger.error(f"❌ 设备 {device_name} Driver 初始化失败: {e}")
+        log.error(f"❌ 设备 {device_name} Driver 初始化失败: {e}")
         raise
     finally:
-        logger.info(f"🛑 清理设备: {device_name}")
+        log.info(f"🛑 清理设备: {device_name}")
         BasePage.clear_window_size_cache()
         manager.quit_driver()
 
@@ -144,7 +144,7 @@ def secondary_driver_manager(request):
     """按需启动第二个设备的管理器（device_02）"""
     enabled_devices = get_enabled_devices()
     if len(enabled_devices) < 2:
-        logger.warning("⚠️ 未配置第二个设备，无法启动 device_02")
+        log.warning("⚠️ 未配置第二个设备，无法启动 device_02")
         yield None
         return
 
@@ -154,7 +154,7 @@ def secondary_driver_manager(request):
     yield manager
 
     if manager.driver:
-        logger.info(f"🛑 清理设备: {device_info['name']}")
+        log.info(f"🛑 清理设备: {device_info['name']}")
         BasePage.clear_window_size_cache()
         manager.quit_driver()
 
@@ -173,7 +173,7 @@ def pytest_runtest_makereport(item, call):
         if driver:
             screenshot_name = f"{item.name}_{int(time.time())}_failed"
             _attach_screenshot(driver, screenshot_name)
-            logger.error(f"❌ 测试失败，已截图: {screenshot_name}")
+            log.error(f"❌ 测试失败，已截图: {screenshot_name}")
 
 
 def _get_driver_from_item(item) -> Any:
@@ -187,7 +187,7 @@ def _attach_screenshot(driver, name: str):
         screenshot = driver.get_screenshot_as_png()
         allure.attach(screenshot, name=name, attachment_type=allure.attachment_type.PNG)
     except Exception as e:
-        logger.warning(f"⚠️ 截图失败: {e}")
+        log.warning(f"⚠️ 截图失败: {e}")
 
 
 # =======================
@@ -207,7 +207,7 @@ def pytest_collection_modifyitems(session, config, items):
     testcase_file = os.path.join(project_root, "testcase.txt")
 
     if not os.path.exists(testcase_file):
-        logger.warning("⚠️ testcase.txt 不存在，将运行所有用例")
+        log.warning("⚠️ testcase.txt 不存在，将运行所有用例")
         return
 
     with open(testcase_file, "r", encoding="utf-8") as f:
@@ -222,7 +222,7 @@ def pytest_collection_modifyitems(session, config, items):
         selected_cases.add(line)
 
     if not selected_cases:
-        logger.info("ℹ️ testcase.txt 为空，将运行所有用例")
+        log.info("ℹ️ testcase.txt 为空，将运行所有用例")
         return
 
     selected = []
@@ -244,7 +244,7 @@ def pytest_collection_modifyitems(session, config, items):
     # 通知 pytest 哪些用例被跳过（影响报告统计）
     config.hook.pytest_deselected(items=deselected)
 
-    logger.info(
+    log.info(
         f"✅ 根据 testcase.txt 筛选：运行 {len(selected)} 条，跳过 {len(deselected)} 条"
     )
 
@@ -252,12 +252,12 @@ def pytest_collection_modifyitems(session, config, items):
 # 会话生命周期日志
 # =======================
 def pytest_sessionstart(session):
-    logger.info("=" * 60)
-    logger.info("🧪 自动化测试会话开始")
-    logger.info("=" * 60)
+    log.info("=" * 60)
+    log.info("🧪 自动化测试会话开始")
+    log.info("=" * 60)
 
 
 def pytest_sessionfinish(session, exitstatus):
-    logger.info("=" * 60)
-    logger.info(f"🏁 测试会话结束，退出码: {exitstatus}")
-    logger.info("=" * 60)
+    log.info("=" * 60)
+    log.info(f"🏁 测试会话结束，退出码: {exitstatus}")
+    log.info("=" * 60)

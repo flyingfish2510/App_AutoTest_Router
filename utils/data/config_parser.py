@@ -1,7 +1,7 @@
 import configparser
 
 from config.setting import FILE_PATH
-from utils.logging.logger import logger
+from utils.logging.log_tool import log
 
 
 class ConfigParse:
@@ -27,7 +27,7 @@ class ConfigParse:
         try:
             return self.config.get(section, option)
         except Exception as e:
-            logger.error(f'解析配置文件出现异常，原因：{e}')
+            log.error(f'解析配置文件出现异常，原因：{e}')
 
     def get_host(self, option):
         """

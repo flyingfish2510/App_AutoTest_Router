@@ -11,7 +11,7 @@ from common.base_page import BasePage
 from common.device_controller import DeviceController
 from common.exceptions import ElementNotFoundException
 from common.page_validator import PageValidator
-from utils.logging.logger import logger
+from utils.logging.log_tool import log
 
 
 class SmartHomePage(BasePage):
@@ -29,20 +29,20 @@ class SmartHomePage(BasePage):
     @allure.step("启动并进入智慧生活App")
     def start_smarthome_app(self, timeout: int = 60) -> 'SmartHomePage':
         """启动智慧生活App并进入主页面"""
-        logger.debug(f"🚀 启动智慧生活App: {self.PACKAGE_NAME}")
+        log.debug(f"🚀 启动智慧生活App: {self.PACKAGE_NAME}")
 
         self.device.wake_up()
         self.device.go_home()
         self.device.restart_app(self.PACKAGE_NAME)
 
-        logger.debug("点击家居按钮")
+        log.debug("点击家居按钮")
         self.click(self.JIAJU_LOCATOR)
 
         try:
             self.validator.should_contain_element(self.JIAJU_LOCATOR, timeout=timeout)
-            logger.debug("✅ 成功进入智慧生活主页面")
+            log.debug("✅ 成功进入智慧生活主页面")
         except ElementNotFoundException as e:
-            logger.error(f"❌ 进入智慧生活主页面失败: {e}")
+            log.error(f"❌ 进入智慧生活主页面失败: {e}")
             raise
 
         return self
@@ -50,10 +50,10 @@ class SmartHomePage(BasePage):
     @allure.step("关闭智慧生活App")
     def stop_smarthome_app(self) -> 'SmartHomePage':
         """关闭智慧生活App"""
-        logger.debug(f"🛑 关闭智慧生活App: {self.PACKAGE_NAME}")
+        log.debug(f"🛑 关闭智慧生活App: {self.PACKAGE_NAME}")
         self.sleep(1)
         self.device.kill_app(self.PACKAGE_NAME)
-        logger.debug("✅ 智慧生活App已关闭")
+        log.debug("✅ 智慧生活App已关闭")
         return self
 
     @allure.step("点击名称为『{router_name}』的路由卡片")
@@ -64,14 +64,14 @@ class SmartHomePage(BasePage):
         :param timeout: 等待超时时间（秒）
         :return: 自身实例（支持链式调用）
         """
-        logger.debug(f"🖱️ 点击路由卡片：{router_name}")
+        log.debug(f"🖱️ 点击路由卡片：{router_name}")
 
         try:
             # 复用BasePage的标准化文本点击
             self.click_by_text(router_name, timeout=timeout)
-            logger.debug(f"✅ 成功点击路由卡片：{router_name}")
+            log.debug(f"✅ 成功点击路由卡片：{router_name}")
         except ElementNotFoundException:
-            logger.error(f"❌ 未找到名称为『{router_name}』的路由卡片")
+            log.error(f"❌ 未找到名称为『{router_name}』的路由卡片")
             raise
 
         return self
@@ -84,7 +84,7 @@ class SmartHomePage(BasePage):
         :param timeout: 页面加载超时时间（秒）
         :return: RouterPage实例
         """
-        logger.debug(f"🏠 进入路由器管理页面：{router_name}")
+        log.debug(f"🏠 进入路由器管理页面：{router_name}")
 
         # 点击路由卡片
         self.click_router_card_by_name(router_name, timeout=10)
@@ -99,18 +99,18 @@ class SmartHomePage(BasePage):
     @allure.step("检查指定路由卡片是否存在")
     def is_router_card_exist(self, router_name: str, timeout: int = 5) -> bool:
         """检查指定名称的路由卡片是否存在"""
-        logger.debug(f"检查路由卡片是否存在：{router_name}")
+        log.debug(f"检查路由卡片是否存在：{router_name}")
         xpath = f'//*[contains(@text, "{router_name}")]'
         locator = (By.XPATH, xpath)
 
         exists = self.is_element_exist(locator, timeout)
-        logger.debug(f"路由卡片『{router_name}』存在状态: {exists}")
+        log.debug(f"路由卡片『{router_name}』存在状态: {exists}")
         return exists
 
     @allure.step("获取路由卡片数量")
     def get_router_card_count(self, timeout: int = 10) -> int:
         """获取当前页面显示的路由卡片数量"""
-        logger.debug("获取路由卡片数量")
+        log.debug("获取路由卡片数量")
 
         router_card_xpath = '//*[contains(@resource-id, "device") or contains(@text, "路由")]'
         locator = (By.XPATH, router_card_xpath)
@@ -118,8 +118,8 @@ class SmartHomePage(BasePage):
         try:
             cards = self.wait_all_visible(locator, timeout)
             count = len(cards)
-            logger.debug(f"当前页面共有 {count} 个路由卡片")
+            log.debug(f"当前页面共有 {count} 个路由卡片")
             return count
         except ElementNotFoundException:
-            logger.debug("当前页面没有路由卡片")
+            log.debug("当前页面没有路由卡片")
             return 0

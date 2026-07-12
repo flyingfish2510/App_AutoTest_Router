@@ -10,7 +10,7 @@ from appium.webdriver.common.appiumby import AppiumBy as By
 from common.base_page import BasePage
 from common.exceptions import ElementNotFoundException
 from common.page_validator import PageValidator
-from utils.logging.logger import logger
+from utils.logging.log_tool import log
 
 
 class RouterPage(BasePage):
@@ -32,10 +32,10 @@ class RouterPage(BasePage):
         # 优先校验页面指示器元素（更可靠）
         try:
             self.validator.should_contain_element(self.PAGE_INDICATOR, timeout=timeout)
-            logger.debug("✅ 路由器主页面加载成功（通过元素校验）")
+            log.debug("✅ 路由器主页面加载成功（通过元素校验）")
             return
         except ElementNotFoundException:
-            logger.warning("⚠️ 未找到页面指示器元素，尝试校验Activity")
+            log.warning("⚠️ 未找到页面指示器元素，尝试校验Activity")
 
         # 备选：校验Activity（兼容旧逻辑）
         try:
@@ -44,9 +44,9 @@ class RouterPage(BasePage):
                 match_type="contains",
                 timeout=timeout
             )
-            logger.debug("✅ 路由器主页面加载成功（通过Activity校验）")
+            log.debug("✅ 路由器主页面加载成功（通过Activity校验）")
         except ElementNotFoundException as e:
-            logger.error(f"❌ 路由器主页面加载失败：{e.message}")
+            log.error(f"❌ 路由器主页面加载失败：{e.message}")
             raise
 
     @allure.step("进入设备页面")
@@ -56,16 +56,16 @@ class RouterPage(BasePage):
         :param timeout: 页面加载超时时间（秒）
         :return: 自身实例（支持链式调用）
         """
-        logger.debug("📱 进入设备页面")
+        log.debug("📱 进入设备页面")
         try:
             # 方式1：点击设备选项卡（如果存在）
             # self.click(self.DEVICE_TAB)
             self.sleep(3)
             self.tap(0.5, 0.533)
-            logger.debug("✅ 点击设备选项卡")
+            log.debug("✅ 点击设备选项卡")
         except ElementNotFoundException:
             # 方式2：使用坐标点击（备用方案）
-            logger.warning("⚠️ 未找到设备选项卡，使用坐标点击")
+            log.warning("⚠️ 未找到设备选项卡，使用坐标点击")
             self.tap(0.5, 0.65)
 
         # # 验证设备页面是否加载成功

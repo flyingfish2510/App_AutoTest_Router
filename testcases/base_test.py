@@ -5,7 +5,7 @@ import allure
 import pytest
 from appium.webdriver.webdriver import WebDriver
 
-from utils.logging.logger import logger
+from utils.logging.log_tool import log
 
 
 class BaseTest:
@@ -22,12 +22,12 @@ class BaseTest:
         yield
 
     def setup_method(self):
-        logger.info("🚀 开始初始化测试环境")
+        log.info("🚀 开始初始化测试环境")
         self.setup()
 
     def teardown_method(self):
         if self._test_failed():
-            logger.info("❌ 测试失败，跳过 teardown")
+            log.info("❌ 测试失败，跳过 teardown")
             return
         self.teardown()
 
@@ -49,12 +49,12 @@ class BaseTest:
     def step(self, title: str):
         with allure.step(title):
             pass
-        logger.info(f"▶️ {title}")
+        log.info(f"▶️ {title}")
 
     def checkpoint(self, title: str):
         with allure.step(title):
             pass
-        logger.info(f"🔍 {title}")
+        log.info(f"🔍 {title}")
 
     def sleep(self, seconds: int = 1):
         time.sleep(seconds)

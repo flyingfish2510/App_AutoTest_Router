@@ -9,14 +9,14 @@ BasePage（最终稳定版 · 类型安全）
 """
 
 import time
-import allure
 from typing import Tuple
 
+import allure
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.actions import interaction
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver.common.actions.pointer_input import PointerInput
-from selenium.webdriver.common.actions import interaction
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -34,7 +34,7 @@ from common.exceptions import (
     ElementNotClickableException,
     ElementInputException,
 )
-from utils.logging.logger import logger
+from utils.logging.log_tool import log
 
 # =======================
 # 本地常量定义
@@ -65,7 +65,7 @@ class BasePage:
             with allure.step("获取屏幕尺寸（首次）"):
                 size = self.driver.get_window_size()
                 self._window_sizes[driver_id] = (size["width"], size["height"])
-                logger.debug(f"📱 屏幕尺寸已缓存: {self._window_sizes[driver_id]}")
+                log.debug(f"📱 屏幕尺寸已缓存: {self._window_sizes[driver_id]}")
 
         return self._window_sizes[driver_id]
 
@@ -73,7 +73,7 @@ class BasePage:
     def clear_window_size_cache(cls):
         """清空屏幕尺寸缓存（用于多设备串行切换）"""
         cls._window_sizes.clear()
-        logger.debug("🧹 屏幕尺寸缓存已清空")
+        log.debug("🧹 屏幕尺寸缓存已清空")
 
     # =======================
     # 基础能力
@@ -272,7 +272,7 @@ class BasePage:
         x = int(self.width * x_ratio)
         y = int(self.height * y_ratio)
         self.driver.tap([(x, y)], duration)
-        logger.debug(f"点击坐标: ({x}, {y})")
+        log.debug(f"点击坐标: ({x}, {y})")
 
     @allure.step("长按元素: {locator}")
     def long_press(self, locator: Tuple[str, str], duration: int = LONG_PRESS_DURATION):

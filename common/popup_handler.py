@@ -11,7 +11,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 
 from common.base_page import BasePage
 from common.exceptions import ElementNotFoundException  # ✅ 对齐 E1001 异常
-from utils.logging.logger import logger
+from utils.logging.log_tool import log
 
 
 class PopupHandler:
@@ -45,7 +45,7 @@ class PopupHandler:
         :return: 是否处理了弹窗
         """
         target_texts = self.PERMISSION_ALLOW_TEXTS if allow else self.PERMISSION_DENY_TEXTS
-        logger.debug(f"开始检测权限弹窗（目标：{'允许' if allow else '拒绝'}）")
+        log.debug(f"开始检测权限弹窗（目标：{'允许' if allow else '拒绝'}）")
 
         for text in target_texts:
             try:
@@ -53,12 +53,12 @@ class PopupHandler:
                 locator = (AppiumBy.XPATH, f'//*[contains(@text, "{text}")]')
                 self.base_page.wait_visible(locator, timeout=timeout)
                 self.base_page.click(locator)
-                logger.info(f"成功处理权限弹窗：点击「{text}」")
+                log.info(f"成功处理权限弹窗：点击「{text}」")
                 return True
             except ElementNotFoundException:
                 continue  # 尝试下一个可能的文本
 
-        logger.debug("未检测到权限弹窗")
+        log.debug("未检测到权限弹窗")
         return False
 
     @allure.step("处理系统弹窗（关闭/取消）")
@@ -71,18 +71,18 @@ class PopupHandler:
         :param timeout: 弹窗检测超时时间（秒）
         :return: 是否处理了弹窗
         """
-        logger.debug("开始检测系统弹窗")
+        log.debug("开始检测系统弹窗")
         for text in self.SYSTEM_POPUP_CLOSE_TEXTS:
             try:
                 locator = (AppiumBy.XPATH, f'//*[contains(@text, "{text}")]')
                 self.base_page.wait_visible(locator, timeout=timeout)
                 self.base_page.click(locator)
-                logger.info(f"成功处理系统弹窗：点击「{text}」")
+                log.info(f"成功处理系统弹窗：点击「{text}」")
                 return True
             except ElementNotFoundException:
                 continue
 
-        logger.debug("未检测到系统弹窗")
+        log.debug("未检测到系统弹窗")
         return False
 
     @allure.step("处理应用内弹窗（指定文本）")
@@ -97,15 +97,15 @@ class PopupHandler:
         :param timeout: 弹窗检测超时时间（秒）
         :return: 是否处理了弹窗
         """
-        logger.debug(f"开始检测应用内弹窗（目标按钮：{button_text}）")
+        log.debug(f"开始检测应用内弹窗（目标按钮：{button_text}）")
         locator = (AppiumBy.XPATH, f'//*[contains(@text, "{button_text}")]')
         try:
             self.base_page.wait_visible(locator, timeout=timeout)
             self.base_page.click(locator)
-            logger.info(f"成功处理应用内弹窗：点击「{button_text}」")
+            log.info(f"成功处理应用内弹窗：点击「{button_text}」")
             return True
         except ElementNotFoundException:
-            logger.debug(f"未检测到应用内弹窗（按钮：{button_text}）")
+            log.debug(f"未检测到应用内弹窗（按钮：{button_text}）")
             return False
 
     @allure.step("批量处理常见弹窗")

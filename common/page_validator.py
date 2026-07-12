@@ -12,7 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from common.exceptions import PageSwitchFailedException  # ✅ 对齐 E2001 异常
-from utils.logging.logger import logger
+from utils.logging.log_tool import log
 
 
 class PageValidator:
@@ -37,7 +37,7 @@ class PageValidator:
             WebDriverWait(self.driver, timeout).until(
                 EC.visibility_of_element_located(locator)
             )
-            logger.debug(f"页面校验成功：包含元素 {locator}")
+            log.debug(f"页面校验成功：包含元素 {locator}")
             return True
         except TimeoutException:
             raise PageSwitchFailedException(
@@ -63,7 +63,7 @@ class PageValidator:
             WebDriverWait(self.driver, timeout).until_not(
                 EC.visibility_of_element_located(locator)
             )
-            logger.debug(f"页面校验成功：不包含元素 {locator}")
+            log.debug(f"页面校验成功：不包含元素 {locator}")
             return True
         except TimeoutException:
             raise PageSwitchFailedException(
@@ -92,7 +92,7 @@ class PageValidator:
             WebDriverWait(self.driver, timeout).until(
                 lambda d: self._check_activity(d, expected_activity, match_type)
             )
-            logger.debug(f"页面校验成功：Activity 匹配 {expected_activity}（类型：{match_type}）")
+            log.debug(f"页面校验成功：Activity 匹配 {expected_activity}（类型：{match_type}）")
             return True
         except TimeoutException:
             current_activity = self.driver.current_activity
@@ -140,7 +140,7 @@ class PageValidator:
             WebDriverWait(self.driver, timeout).until(
                 lambda d: self._check_title(d, expected_title, exact_match)
             )
-            logger.debug(f"页面校验成功：标题匹配 {expected_title}（精确匹配：{exact_match}）")
+            log.debug(f"页面校验成功：标题匹配 {expected_title}（精确匹配：{exact_match}）")
             return True
         except TimeoutException:
             current_title = self.driver.title

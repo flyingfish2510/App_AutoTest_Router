@@ -5,7 +5,7 @@
 """
 from config.setting import FILE_PATH
 from utils.data.yaml_reader import read_yaml
-from utils.logging.logger import logger
+from utils.logging.log_tool import log
 
 # =======================
 # 时间相关常量
@@ -59,8 +59,8 @@ class MYG:
             self.PHONE_NEW_NAME = data['phone_new_name']  # 修正这里：使用 phone_new_name
         except Exception as e:
             # 添加异常处理，防止配置文件读取失败导致程序崩溃
-            logger.warning(f"警告: 加载 user_config.yaml 失败 - {e}")
-            logger.warning("将使用默认配置")
+            log.warning(f"警告: 加载 user_config.yaml 失败 - {e}")
+            log.warning("将使用默认配置")
             self.ROUTER_NAME = "默认路由器"
             self.PHONE_NAME = "默认手机"
             self.PHONE_NEW_NAME = "默认手机新名称"

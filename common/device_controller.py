@@ -7,11 +7,11 @@
 import time
 from typing import Optional
 
-from appium.webdriver.webdriver import WebDriver
-from utils.logging.logger import logger
 import allure
+from appium.webdriver.webdriver import WebDriver
 
 from common.exceptions import DeviceOperationException  # ✅ 对齐 E3002 异常
+from utils.logging.log_tool import log
 
 # Android KeyCode 常量（避免魔法数字）
 KEYCODE_HOME = 3
@@ -36,7 +36,7 @@ class DeviceController:
             )
             return "mWakefulness=Awake" in result or "mScreenOn=true" in result
         except Exception as e:
-            logger.warning(f"检测屏幕状态失败: {e}")
+            log.warning(f"检测屏幕状态失败: {e}")
             return False
 
     @allure.step("唤醒屏幕")
@@ -44,9 +44,9 @@ class DeviceController:
         """唤醒屏幕"""
         if not self.is_screen_on():
             self.driver.press_keycode(KEYCODE_WAKEUP)
-            logger.debug("屏幕已唤醒")
+            log.debug("屏幕已唤醒")
         else:
-            logger.debug("屏幕已是唤醒状态")
+            log.debug("屏幕已是唤醒状态")
 
     @allure.step("解锁屏幕（PIN码: {pin_code}）")
     def unlock(self, pin_code: Optional[str] = None):
@@ -56,21 +56,21 @@ class DeviceController:
             for digit in pin_code:
                 self.driver.press_keycode(int(digit))
                 time.sleep(0.1)  # 模拟真实输入间隔
-            logger.debug(f"PIN 解锁完成")
+            log.debug(f"PIN 解锁完成")
 
     # ================= 应用生命周期 =================
     @allure.step("返回桌面")
     def go_home(self):
         """返回桌面"""
         self.driver.press_keycode(KEYCODE_HOME)
-        logger.debug("已返回桌面")
+        log.debug("已返回桌面")
 
     @allure.step("启动应用: {package}")
     def start_app(self, package: str):
         """启动应用"""
         try:
             self.driver.activate_app(package)
-            logger.info(f"应用已启动: {package}")
+            log.info(f"应用已启动: {package}")
         except Exception as e:
             raise DeviceOperationException(
                 message=f"启动应用 {package} 失败",
@@ -84,7 +84,7 @@ class DeviceController:
         try:
             self.driver.terminate_app(package)
         except Exception as e:
-            logger.warning(f"Terminate app 失败: {e}，尝试 shell 命令")
+            log.warning(f"Terminate app 失败: {e}，尝试 shell 命令")
             try:
                 self.driver.execute_script(
                     "mobile: shell",
@@ -96,7 +96,7 @@ class DeviceController:
                     action="kill_app",
                     extra={"package": package, "error": str(e)}
                 )
-        logger.info(f"应用已终止: {package}")
+        log.info(f"应用已终止: {package}")
 
     @allure.step("重启应用: {package}")
     def restart_app(self, package: str, wait: int = 2):
@@ -110,7 +110,7 @@ class DeviceController:
     def press_back(self):
         """模拟物理返回键"""
         self.driver.press_keycode(KEYCODE_BACK)
-        logger.debug("点击返回键")
+        log.debug("点击返回键")
 
     # ================= 系统信息 =================
     @allure.step("获取当前 Activity")
@@ -119,7 +119,7 @@ class DeviceController:
         try:
             return self.driver.current_activity
         except Exception as e:
-            logger.warning(f"获取 Activity 失败: {e}")
+            log.warning(f"获取 Activity 失败: {e}")
             raise DeviceOperationException(
                 message="获取当前 Activity 失败",
                 action="get_current_activity",
@@ -140,7 +140,7 @@ class DeviceController:
                 "mobile: shell",
                 {"command": "pm", "args": ["clear", package]}
             )
-            logger.info(f"已清除应用数据: {package}")
+            log.info(f"已清除应用数据: {package}")
         except Exception as e:
             raise DeviceOperationException(
                 message=f"清除应用数据 {package} 失败",

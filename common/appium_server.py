@@ -15,7 +15,7 @@ from typing import Optional
 
 import requests
 
-from utils.logging.logger import logger
+from utils.logging.log_tool import log
 
 
 class AppiumServer:
@@ -36,7 +36,7 @@ class AppiumServer:
         self.process: Optional[subprocess.Popen] = None
 
         if self.ci_mode:
-            logger.info(f"🧪 CI 模式：跳过 Appium 自启动，直连 {self.server_url}")
+            log.info(f"🧪 CI 模式：跳过 Appium 自启动，直连 {self.server_url}")
 
     def is_port_available(self) -> bool:
         """检查端口是否可用（CI 模式下跳过）"""
@@ -62,17 +62,17 @@ class AppiumServer:
         """启动 Appium Server（CI 模式下直接跳过）"""
         if self.ci_mode:
             if self.is_server_running():
-                logger.info(f"✅ CI 模式：检测到 Appium Server 已运行 {self.server_url}")
+                log.info(f"✅ CI 模式：检测到 Appium Server 已运行 {self.server_url}")
                 return True
             else:
-                logger.error(f"❌ CI 模式：Appium Server 未运行，请先在宿主机启动")
-                logger.error(f"   执行：appium -a 0.0.0.0 -p {self.port} --session-override")
+                log.error(f"❌ CI 模式：Appium Server 未运行，请先在宿主机启动")
+                log.error(f"   执行：appium -a 0.0.0.0 -p {self.port} --session-override")
                 return False
 
-        logger.info(f"🚀 启动 Appium Server: {self.server_url}")
+        log.info(f"🚀 启动 Appium Server: {self.server_url}")
 
         if not self.is_port_available():
-            logger.warning(f"⚠️ 端口 {self.port} 被占用，尝试释放...")
+            log.warning(f"⚠️ 端口 {self.port} 被占用，尝试释放...")
             self._kill_process_on_port()
             time.sleep(2)
 
@@ -95,19 +95,19 @@ class AppiumServer:
             )
 
             if self._wait_for_server():
-                logger.info(f"✅ Appium Server 启动成功: {self.server_url}")
+                log.info(f"✅ Appium Server 启动成功: {self.server_url}")
                 return True
             else:
-                logger.error("❌ Appium Server 启动超时")
+                log.error("❌ Appium Server 启动超时")
                 self.stop()
                 return False
 
         except Exception as e:
-            logger.error(f"❌ 启动 Appium Server 失败: {e}")
+            log.error(f"❌ 启动 Appium Server 失败: {e}")
             return False
 
     def _wait_for_server(self, timeout: int = 30) -> bool:
-        logger.info("⏳ 等待 Appium Server 就绪...")
+        log.info("⏳ 等待 Appium Server 就绪...")
         for _ in range(timeout):
             if self.is_server_running():
                 return True
@@ -142,7 +142,7 @@ class AppiumServer:
         if self.ci_mode or not self.process:
             return
 
-        logger.info("🛑 停止 Appium Server...")
+        log.info("🛑 停止 Appium Server...")
         try:
             if os.name == 'nt':
                 self.process.send_signal(signal.CTRL_C_EVENT)
@@ -150,7 +150,7 @@ class AppiumServer:
                 os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
 
             self.process.wait(timeout=10)
-            logger.info("✅ Appium Server 已停止")
+            log.info("✅ Appium Server 已停止")
         except Exception:
             self.process.kill()
         finally:
@@ -163,7 +163,7 @@ def appium_server_context(host: str = "127.0.0.1", port: int = 4723):
     server = AppiumServer(host=host, port=port)
     try:
         if server.is_server_running():
-            logger.info(f"ℹ️ Appium Server 已运行: {server.server_url}")
+            log.info(f"ℹ️ Appium Server 已运行: {server.server_url}")
             yield server
         else:
             if server.start():

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 
 import yaml
-from loguru import logger
+from loguru import logger as _loguru_logger
 
 from utils.logging.formatter import LogFileNameGenerator
 
@@ -65,7 +65,7 @@ class LoggerConfig:
                     self._deep_update(self.config['logging'], loaded_config['logging'])
 
         except Exception as e:
-            print(f"加载配置文件失败: {e}")
+            _loguru_logger.info(f"加载配置文件失败: {e}")
 
     def _deep_update(self, base_dict: dict, update_dict: dict) -> None:
         """深度更新字典"""
@@ -133,7 +133,7 @@ class EnterpriseLogger:
 
     def _setup_logger(self) -> None:
         """配置 Loguru 日志系统"""
-        logger.remove()
+        _loguru_logger.remove()
 
         level = self.config.get('level', 'DEBUG')
         console_enabled = self.config.get('console_enabled', True)
@@ -149,7 +149,7 @@ class EnterpriseLogger:
 
         # 控制台 handler
         if console_enabled:
-            logger.add(
+            _loguru_logger.add(
                 sys.stdout,
                 level=level,
                 format=console_format,
@@ -164,7 +164,7 @@ class EnterpriseLogger:
         if file_enabled:
             log_file_path = self._get_log_file_path()
 
-            logger.add(
+            _loguru_logger.add(
                 log_file_path,
                 level=level,
                 format=file_format,
@@ -178,11 +178,11 @@ class EnterpriseLogger:
                 catch=True
             )
 
-            logger.info(f"日志系统初始化 | 文件: {log_file_path} | 环境: {environment}")
+            _loguru_logger.info(f"日志系统初始化 | 文件: {log_file_path} | 环境: {environment}")
 
     @staticmethod
     def get_logger():
-        return logger
+        return _loguru_logger
 
     def get_current_log_file(self) -> str:
         """获取当前日志文件路径"""
@@ -195,4 +195,4 @@ def get_logger(config_path: Optional[str] = None):
     return enterprise_logger.get_logger()
 
 
-logger = get_logger("config/log_settings.yaml")
+log = get_logger("config/log_settings.yaml")

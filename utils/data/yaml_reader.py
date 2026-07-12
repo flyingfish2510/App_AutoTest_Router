@@ -1,7 +1,7 @@
 
 import yaml
 
-from utils.logging.logger import logger
+from utils.logging.log_tool import log
 
 
 def read_yaml(yaml_path):
@@ -25,9 +25,9 @@ def read_yaml(yaml_path):
             else:
                 return data
     except UnicodeDecodeError:
-        logger.error(f'{yaml_path}文件编码格式错误，--尝试使用utf-8去解码YAML文件发生错误，请确保你的yaml文件是utf-8格式！')
+        log.error(f'{yaml_path}文件编码格式错误，--尝试使用utf-8去解码YAML文件发生错误，请确保你的yaml文件是utf-8格式！')
     except yaml.YAMLError as e:
-        logger.error(f'Error：读取yaml文件失败，请检查格式 -{yaml_path}，{e}')
+        log.error(f'Error：读取yaml文件失败，请检查格式 -{yaml_path}，{e}')
     except Exception as e:
-        logger.error(f'读取{yaml_path}文件时出现异常，原因：{e}')
+        log.error(f'读取{yaml_path}文件时出现异常，原因：{e}')
 
