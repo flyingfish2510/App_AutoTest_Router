@@ -195,4 +195,4 @@ def get_logger(config_path: Optional[str] = None):
     return enterprise_logger.get_logger()
 
 
-logger = get_logger("config/settings.yaml")
+logger = get_logger("config/log_settings.yaml")
