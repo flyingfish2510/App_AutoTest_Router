@@ -15,7 +15,7 @@ LOG_RETENTION_DAYS = 30
 
 class LogFileNameGenerator:
     """
-    日志文件名生成器
+    日志文件名生成器（支持设备级隔离）
     ✅ 支持按设备、环境、日期生成唯一文件名
     ✅ 支持多设备并行日志隔离
     ✅ 支持日志轮转
@@ -30,7 +30,7 @@ class LogFileNameGenerator:
             include_env: bool = True,
             environment: str = "development",
             separator: str = "_",
-            device_name: Optional[str] = None
+            device_name: Optional[str] = None  # ✅ 设备名参数
     ):
         """
         初始化日志文件名生成器
@@ -42,11 +42,11 @@ class LogFileNameGenerator:
         self.include_env = include_env
         self.environment = environment
         self.separator = separator
-        self.device_name = device_name or "default"
+        self.device_name = device_name or "default"  # ✅ 默认设备名
 
     def generate_filename(self, timestamp: Optional[float] = None) -> str:
         """
-        生成日志文件名
+        生成日志文件名（包含设备名）
         """
         if timestamp is None:
             timestamp = time.time()
@@ -55,6 +55,7 @@ class LogFileNameGenerator:
 
         parts = [self.prefix]
 
+        # ✅ 设备名放在最前面，便于识别和筛选
         if self.device_name != "default":
             parts.append(self.device_name)
 
