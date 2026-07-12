@@ -4,6 +4,7 @@
 
 import os
 import sys
+import threading
 from pathlib import Path
 from typing import Dict, Any, Optional
 
@@ -54,18 +55,18 @@ class LoggerConfig:
             self._load_config(config_path)
 
     def _load_config(self, config_path: str) -> None:
+        if not os.path.exists(config_path):
+            raise FileNotFoundError(f"日志配置文件不存在: {config_path}")
+
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
-                if config_path.endswith(('.yaml', '.yml')):
-                    loaded_config = yaml.safe_load(f)
-                else:
-                    return
-
-                if 'logging' in loaded_config:
-                    self._deep_update(self.config['logging'], loaded_config['logging'])
-
+                loaded_config = yaml.safe_load(f)
+                if 'logging' not in loaded_config:
+                    raise ValueError("YAML 缺少 'logging' 根节点")
+                self._deep_update(self.config['logging'], loaded_config['logging'])
         except Exception as e:
-            _loguru_logger.info(f"加载配置文件失败: {e}")
+            # 关键：重新抛出异常，阻止使用默认配置
+            raise RuntimeError(f"加载日志配置失败: {e}") from e
 
     def _deep_update(self, base_dict: dict, update_dict: dict) -> None:
         """深度更新字典"""
@@ -84,14 +85,14 @@ class LoggerConfig:
 
 
 class EnterpriseLogger:
-    """企业级日志管理器 - 支持时间命名"""
-
     _instance = None
-    _initialized = False
+    _initialized = None
+    _lock = threading.Lock()  # 添加锁
 
     def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
+        with cls._lock:  # 双重检查锁定
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
         return cls._instance
 
     def __init__(self, config_path: Optional[str] = None):
