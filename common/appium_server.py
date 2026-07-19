@@ -106,7 +106,7 @@ class AppiumServer:
             log.error(f"❌ 启动 Appium Server 失败: {e}")
             return False
 
-    def _wait_for_server(self, timeout: int = 30) -> bool:
+    def _wait_for_server(self, timeout: int = 60) -> bool:
         log.info("⏳ 等待 Appium Server 就绪...")
         for _ in range(timeout):
             if self.is_server_running():
