@@ -96,3 +96,4 @@ testcase.txt
 show_tree.py
 clean_cache.py
 .git
+temp/
